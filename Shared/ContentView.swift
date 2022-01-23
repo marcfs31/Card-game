@@ -8,20 +8,35 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var playerCard = "card5"
-    @State private var cpuCard = "card9"
+    @State private var playerCard = "back"
+    @State private var cpuCard = "back"
     @State private var playerScore = 0;
     @State private var cpuScore = 0;
+    @State private var winner = false;
+    @State private var hasPlayerWon = "undefined";
     
     var body: some View {
         ZStack {
             Image("background").ignoresSafeArea()
-            // Vertical stack
+            
             VStack {
                 Spacer()
-                Image("logo")
+                HStack {
+                    Image("logo")
+                }
                 Spacer()
-                // Horizontal stack
+                
+                // Winner message handling
+                if hasPlayerWon == "yes" {
+                    Text("Congrats player!").font(.title)
+                        .foregroundColor(Color.white)
+                        .background(Color.black)
+                } else if hasPlayerWon == "no" {
+                    Text("Congrats CPU!").font(.title)
+                        .foregroundColor(Color.white)
+                        .background(Color.black)
+                }
+                
                 HStack {
                     Spacer()
                     Image(playerCard)
@@ -31,28 +46,53 @@ struct ContentView: View {
                 }
                 // Deal button
                 Spacer()
-                Button(action: {
-                    // Randomize cards
-                    let playerRand = Int.random(in: 2...14)
-                    let cpuRand = Int.random(in: 2...14)
-                    // Update cards
-                    playerCard = "card" + String(playerRand)
-                    cpuCard = "card" + String(cpuRand)
-                    
-                    // Update the score
-                    if playerRand > cpuRand {
-                        playerScore += 1
-                    } else if cpuRand > playerRand {
-                        cpuScore += 1
-                    }
-                }, label: {
-                    Image("dealbutton")
-                })
+                if (playerScore < 10 && cpuScore < 10) {
+                    Button(action: {
+                        // Randomize cards
+                        let playerRand = Int.random(in: 2...14)
+                        let cpuRand = Int.random(in: 2...14)
+                        // Update cards
+                        playerCard = "card" + String(playerRand)
+                        cpuCard = "card" + String(cpuRand)
+                        
+                        // Update the score
+                        if playerRand > cpuRand {
+                            playerScore += 1
+                        } else if cpuRand > playerRand {
+                            cpuScore += 1
+                        }
+                        
+                        // Handle winner
+                        if playerScore == 10 {
+                            winner = true
+                            hasPlayerWon = "yes"
+                        } else if cpuScore == 10 {
+                            winner = true
+                            hasPlayerWon = "no"
+                        }
+                    }, label: {
+                        Image("dealbutton")
+                    })
+                } else {
+                    // If there's a winner show play again button and reset game
+                    Button(action: {
+                        playerCard = "back"
+                        cpuCard = "back"
+                        playerScore = 0
+                        cpuScore = 0
+                        hasPlayerWon = "undefined"
+                    }, label: {
+                        Text("Play Again")
+                            .font(.title)
+                            .foregroundColor(Color.white)
+                            .background(Color.black)
+                            .padding(.bottom, 10.0)
+                    })
+                }
+                
                 Spacer()
-                // Horizontal stack
                 HStack {
                     Spacer()
-                    // Vertical stack
                     VStack {
                         // Text with modifiers for the player
                         Text("Player")
@@ -64,7 +104,6 @@ struct ContentView: View {
                             .foregroundColor(Color.white)
                     }
                     Spacer()
-                    // Vertical stack
                     VStack {
                         // Text with modifiers for the CPU
                         Text("CPU")
